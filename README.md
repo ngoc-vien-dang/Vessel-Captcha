@@ -38,9 +38,9 @@ We perform training a classification model using the following command:
 ```sh
 python -m captcha.train_pnetcls --model_arch 'pnetcls' --patch_dir <path-to-extracted-patches>  --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save model>
 ```
-##### Data Augmentation for 2D-WnetSeg:
+##### Data Augmentation for 2D-WnetSeg (optional):
 ```sh
-python -m captcha.train_pnetcls --model_arch 'pnetcls' --patch_dir <path-to-extracted-patches>  --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save model>
+python -m captcha.pnetcls.prediction --patch_size 32 --train_non_label_dir <path-to-non-label-data> --train_metadata_filepath <path-to-load-metadata> --model_filepath <path-to-load-pnetcl-model> --grid_label_filepath <path-to-save-patch-label>
 ```
 #### 2D-WnetSeg:
 We perform training a segmentation model using the following command:
@@ -50,16 +50,12 @@ python -m captcha.train_wnetseg --skull_stripping_dir <path-to-extracted-patches
 ### 5. Predicting Volume
 We are now able to classify pixels with and  without vessel from the brain MRI volume using the trained segmentation model from the previous step. The command that helps us to do this is:
 ```sh
-python -m captcha.predict_full_testset --test_set_dir <path-to-testset> --model_arch 'wnetseg' --patch_size 96 --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save-model> --prediction_filepath <patch-to-segmentation-volume>
+python -m captcha.predict_full_testset --test_set_dir <path-to-testset> --model_arch 'wnetseg' --patch_size 96 --train_metadata_filepath <path-to-load-metadata> --model_filepath <path-to-load-wnetseg-model> --prediction_filepath <patch-to-save-vessel-segmentation>
 ```
-Applying filtering:
+##### Applying filtering (optional):
 ```sh
-python -m captcha.predict_full_testset --test_set_dir <path-to-testset> --model_arch 'wnetseg' --patch_size 96 --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save-model> --prediction_filepath <patch-to-segmentation-volume>
+python -m captcha.filter --patch_size 32 --wnetseg_prediction_dir <path-to-testset> --train_metadata_filepath <path-to-load-metadata> --model_filepath <path-to-load-pnetcl-model> --wnetseg_pnetcl_filepath <path-to-save-vessel-segmentation>
 ```
-```sh
-python -m captcha.predict_full_testset --test_set_dir <path-to-testset> --model_arch 'wnetseg' --patch_size 96 --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save-model> --prediction_filepath <patch-to-segmentation-volume>
-```
-
 ### 6. Evaluating Framework's Performance
 ```sh
 python -m captcha.evaluation_segmentation --result_dir <path-to-prediction-dir> 
