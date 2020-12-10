@@ -2,7 +2,7 @@
 
 By Vien N. Dang and Maria A. Zuluaga
 
-![alt text](https://github.com//ngoc-vien-dang/Vessel-Captcha/tree/main/imgs/pipeline.png?raw=true)
+<img src="imgs/pipeline.png" >
 
 This is the implementation of our Vessel-CAPTCHA framework for vessel brain MRI segmentation in Keras.
 
