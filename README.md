@@ -1,7 +1,5 @@
 # Vessel-Captcha: An Efficient Learning Framework for Vessel Annotation and Segmentation
 
-By Vien N. Dang and Maria A. Zuluaga
-
 <img src="imgs/pipeline.png" >
 
 This is the implementation of our Vessel-CAPTCHA framework for vessel brain MRI segmentation in Keras.
