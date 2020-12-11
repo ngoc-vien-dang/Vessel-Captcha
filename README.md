@@ -10,13 +10,13 @@ This is the implementation of our Vessel-CAPTCHA framework for vessel brain MRI 
 #### Skull stripping:
 Removing the skull from the MRI images by applying the mask.
 ```sh
-python -m captcha.preprocessing.skull_stripping --original_data_dir <path-to-raw-dataset> --target_dir <path-to-skull-stripping-volume>
+python -m captcha.preprocessing.skull_stripping --original_data_dir <path-to-raw-dataset> --target_dir <path-to-skull-stripping-dir>
 ```
 ### 2. Generating Weak Annotations
 #### Grid creating:
 Creating the grid for weak annotation.
 ```sh
-python -m captcha.preprocessing.grid --original_data <path-to-raw-dataset> --grid_filepath <path-to-grid-volume>
+python -m captcha.preprocessing.grid --original_data <path-to-raw-dataset> --grid_filepath <path-to-grid-dir>
 ```
 #### Rough-mask creating:
 ```sh
