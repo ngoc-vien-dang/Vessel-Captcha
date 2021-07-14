@@ -17,15 +17,17 @@ from captcha.utils.pnetcls import get_pnetcls
 from captcha.utils.vgg import get_vgg
 from captcha.utils.unetcls import get_unetcls
 from captcha.utils.resnet import get_resnet
-from captcha.utils.helper import gen_filename_pairs_2
 from sklearn.preprocessing import LabelBinarizer
+from captcha.utils.helper import getAllFiles
 
 def main(args):
     patch_dir = os.path.expanduser(args.patch_dir)
     model_arch = args.model_arch
     train_metadata_filepath = args.train_metadata_filepath
     model_filepath = args.model_filepath
-    vessel_list, empty_list = gen_filename_pairs_2(patch_dir, 'vessel', 'empty')
+    unfiltered_filelist = getAllFiles(patch_dir)
+    vessel_list = [item for item in unfiltered_filelist if re.search('_vessel', item)]
+    empty_list = [item for item in unfiltered_filelist if re.search('_empty', item)]
     vessel_list =  sorted(vessel_list)
     empty_list = sorted(empty_list)
     train_X = np.concatenate((np.load(vessel_list[0]), np.load(empty_list[0])), axis=0)

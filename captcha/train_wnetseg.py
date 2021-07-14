@@ -14,19 +14,21 @@ import re
 import os 
 from keras.optimizers import Adam
 from captcha.utils.metrics import dice_coef_loss, dice_coef
-from captcha.utils.helper import gen_filename_pairs_2
+from captcha.utils.helper import getAllFiles
 from captcha.utils.wnetseg import get_wnetseg
 from captcha.utils.unet import get_unet
 from captcha.utils.pnet import get_pnet
 from keras.preprocessing.image import ImageDataGenerator
 
 def main(args):
-    skull_stripping_dir = os.path.expanduser(args.skull_stripping_dir)
+    label_rough_dir = os.path.expanduser(args.label_rough)
     patch_size = args.patch_size
     model_arch = args.model_arch
     train_metadata_filepath = args.train_metadata_filepath
     model_filepath = args.model_filepath
-    input_list, label_list = gen_filename_pairs_2(skull_stripping_dir, 'img', 'label')
+    unfiltered_filelist = getAllFiles(label_rough_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    label_list = [item for item in unfiltered_filelist if re.search('_label', item)]
     input_list = sorted(input_list)
     label_list = sorted(label_list)
     train_X = np.load(input_list[0])
@@ -120,8 +122,8 @@ def main(args):
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skull_stripping_dir", type=str,
-                        help='Directory for saving the images after the skull stripping process.')
+    parser.add_argument("--label_rough_dir", type=str,
+                        help='Directory for saving the images and the rough labels.')
     parser.add_argument("--model_arch", type=str,
                        help='pnet or unet or wnetseg.')
     parser.add_argument("--train_metadata_filepath", type=str,

@@ -10,9 +10,9 @@ import sys
 import os
 import numpy as np
 import nibabel as nib
-from captcha.utils.helper import gen_filename_pairs_2
 from captcha.utils.helper import load_nifti_mat_from_file
 from captcha.utils.helper import create_and_save_nifti
+from captcha.utils.helper import getAllFiles
 
 def main(args):
     original_data_dir = args.original_data
@@ -20,7 +20,9 @@ def main(args):
     patch_size = 32
     if not os.path.exists(grid_filepath):
         os.makedirs(grid_filepath)
-    input_list, mask_list = gen_filename_pairs_2(original_data_dir, 'img', 'mask')
+    unfiltered_filelist = getAllFiles(original_data_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     print(input_list)

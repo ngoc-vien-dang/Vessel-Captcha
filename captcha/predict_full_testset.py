@@ -15,8 +15,8 @@ import nibabel as nib
 from keras.models import load_model
 from captcha.utils.metrics import dice_coef_loss, dice_coef
 from captcha.utils.helper import create_and_save_nifti
-from captcha.utils.helper import gen_filename_pairs_2
 from captcha.utils.helper import load_nifti_mat_from_file
+from captcha.utils.helper import getAllFiles
 
 def main(args):
     test_set_dir = args.test_set_dir
@@ -33,7 +33,9 @@ def main(args):
         train_metadata = pickle.load(handle)
     print(train_metadata)
     # List filenames of data after the skull stripping process
-    input_list, mask_list = gen_filename_pairs_2(test_set_dir, 'img', 'mask')
+    unfiltered_filelist = getAllFiles(test_set_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     print(input_list)

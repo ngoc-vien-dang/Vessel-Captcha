@@ -43,7 +43,7 @@ python -m captcha.pnetcls.prediction --patch_size 32 --train_non_label_dir <path
 #### 2D-WnetSeg:
 We perform training a segmentation model using the following command:
 ```sh
-python -m captcha.train_wnetseg --skull_stripping_dir <path-to-extracted-patches> --model_arch  'wnetseg' --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save-model> --patch_size 96
+python -m captcha.train_wnetseg --label_rough_dir <path-to-extracted-patches> --model_arch  'wnetseg' --train_metadata_filepath <path-to-save-metadata> --model_filepath <path-to-save-model> --patch_size 96
 ```
 ### 5. Vessel Segmentation
 We are now able to classify pixels with and  without vessel from the brain MRI volume using the trained segmentation model from the previous step. The command that helps us to do this is:

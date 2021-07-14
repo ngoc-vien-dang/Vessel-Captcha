@@ -11,7 +11,7 @@ import nibabel as nib
 import sys
 import argparse
 from captcha.utils.helper import load_nifti_mat_from_file
-from captcha.utils.helper import gen_filename_pairs_3
+from captcha.utils.helper import getAllFiles
 
 def main(args):
     patch_sizes = [96]    # different quadratic patch sizes n x n
@@ -25,7 +25,10 @@ def main(args):
     if not os.path.exists(patch_extraction_dir):
         os.makedirs(patch_extraction_dir)
     # List filenames of data after the skull stripping process
-    input_list, mask_list, label_list = gen_filename_pairs_3(skull_stripping_dir, 'img', 'mask', 'label')
+    unfiltered_filelist = getAllFiles(skull_stripping_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
+    label_list = [item for item in unfiltered_filelist if re.search('_label', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     label_list = sorted(label_list)

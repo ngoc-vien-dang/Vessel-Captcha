@@ -16,7 +16,7 @@ import argparse
 import sys
 import nibabel as nib
 from captcha.utils.helper import create_and_save_nifti
-from captcha.utils.helper import gen_filename_pairs_2
+from captcha.utils.helper import getAllFiles
 from captcha.utils.helper import load_nifti_mat_from_file
 
 def main(args):
@@ -32,7 +32,9 @@ def main(args):
         train_metadata = pickle.load(handle)
     print(train_metadata)
     # List filenames of data after the skull stripping process
-    input_list, mask_list = gen_filename_pairs_2(train_non_label_dir, 'img', 'mask')
+    unfiltered_filelist = getAllFiles(train_non_label_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     print(input_list)
@@ -102,7 +104,7 @@ def main(args):
                     prob_mat[patch_end_x, patch_start_y: patch_end_y, l] = 1
         # Save weak annotation
         create_and_save_nifti(prob_mat, grid_label_filepath +
-                              j.split(os.sep)[-1].split('_')[0]+'_rerun.nii')
+                              j.split(os.sep)[-1].split('_')[0]+'_pnetcls.nii')
         print('done')
     print('DONE')
 

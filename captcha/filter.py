@@ -16,7 +16,7 @@ import argparse
 import sys
 import nibabel as nib
 from captcha.utils.helper import create_and_save_nifti
-from captcha.utils.helper import gen_filename_pairs_3
+from captcha.utils.helper import getAllFiles
 from captcha.utils.helper import load_nifti_mat_from_file
 
 def main(args):
@@ -32,7 +32,10 @@ def main(args):
         train_metadata = pickle.load(handle)
     print(train_metadata)
     # List filenames of data after the skull stripping process
-    input_list, mask_list, prediction_list = gen_filename_pairs_3(wnetseg_prediction_dir, 'img', 'mask', 'prediction')
+    unfiltered_filelist = getAllFiles(wnetseg_prediction_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
+    prediction_list = [item for item in unfiltered_filelist if re.search('_prediction', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     prediction_list = sorted(prediction_list)

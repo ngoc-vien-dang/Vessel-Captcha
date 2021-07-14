@@ -13,7 +13,7 @@ import numpy as np
 import nibabel as nib
 import re
 from sklearn import preprocessing
-from captcha.utils.helper import gen_filename_pairs_3
+from captcha.utils.helper import getAllFiles
 from captcha.utils.helper import load_nifti_mat_from_file
 
 def main(args):
@@ -23,8 +23,10 @@ def main(args):
     if not os.path.exists(patch_vessel_dir):
         os.makedirs(patch_vessel_dir)
     # List filenames of data after the skull stripping process
-    input_list, mask_list, label_list = gen_filename_pairs_3(
-        skull_stripping_dir, 'img', 'mask', 'rerun')
+    unfiltered_filelist = getAllFiles(skull_stripping_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
+    label_list = [item for item in unfiltered_filelist if re.search('_grid', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     label_list = sorted(label_list)

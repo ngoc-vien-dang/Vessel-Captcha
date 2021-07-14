@@ -14,9 +14,9 @@ import random
 import re
 from sklearn import preprocessing
 from sklearn.mixture import GaussianMixture as GMM
-from captcha.utils.helper import gen_filename_pairs_3
 from captcha.utils.helper import load_nifti_mat_from_file
 from captcha.utils.helper import create_and_save_nifti
+from captcha.utils.helper import getAllFiles
 import cv2
 
 def main(args):
@@ -27,7 +27,10 @@ def main(args):
     if not os.path.exists(rough_mask_dir):
         os.makedirs(rough_mask_dir)
     # List filenames of data after the skull stripping process
-    input_list, mask_list, label_list = gen_filename_pairs_3(patch_annotation_dir, 'img', 'mask', 'rerun')
+    unfiltered_filelist = getAllFiles(patch_annotation_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
+    label_list = [item for item in unfiltered_filelist if re.search('_grid', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     label_list = sorted(label_list)
@@ -92,49 +95,63 @@ def main(args):
                         pixels = image
                         pixels = pixels.astype('float32')
                         if clustering == 'kmeans':
-                            try:
-                                vectorized = pixels.reshape((-1, 1))
-                                vectorized = np.float32(vectorized)
-                                criteria = (cv2.TERM_CRITERIA_EPS +cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-                                attempts = 10
-                                if 0 in mask_check:
-                                    K = 4
-                                else:
-                                    K = 2
-                                _, label, center = cv2.kmeans(vectorized, K, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
-                                res = center[label.flatten()]
-                                result_image = res.reshape((image.shape))
-                                result_image[result_image != np.amax(center)] = 0
-                                result_image[result_image == np.amax(center)] = 1
-                                if np.count_nonzero(result_image) < 200:
-                                    cnt += 1
-                                    prob_mat[patch_start_x: patch_end_x,patch_start_y: patch_end_y, l] = result_image
-                            except Exception:
-                                pass
+                            vectorized = pixels.reshape((-1, 1))
+                            vectorized = np.float32(vectorized)
+                            criteria = (cv2.TERM_CRITERIA_EPS +cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+                            attempts = 10
+                            if 0 in mask_check:
+                                K = 4
+                            else:
+                                K = 2
+                            _, label, center = cv2.kmeans(vectorized, K, None, criteria, attempts, cv2.KMEANS_PP_CENTERS)
+                            res = center[label.flatten()]
+                            result_image = res.reshape((image.shape))
+                            result_image[result_image != np.amax(center)] = 0
+                            result_image[result_image == np.amax(center)] = 1
+                            result_image = result_image.astype('int8')
+                            num_labels, labels_im = cv2.connectedComponents(result_image)
+                            threshold = 350
+                            if (0 in mask_check):
+                                threshold = 100
+                            if (3 in label_patch):
+                                threshold = 350          
+                            if (num_labels < 5) and (np.count_nonzero(result_image) < threshold) :
+                                cnt += 1
+                                prob_mat[patch_start_x: patch_end_x,patch_start_y: patch_end_y, l] = result_image 
                         elif clustering == 'gmm':
-                            try:
-                                pixels = image[image != 0]
-                                vectorized = pixels.reshape((-1, 1))
-                                vectorized = np.float32(vectorized)
-                                gmm_model_tied = GMM(n_components=2, covariance_type='tied').fit(vectorized)
-                                center_tied = gmm_model_tied.means_
-                                label_tied = gmm_model_tied.predict(vectorized).reshape(-1, 1)
-                                res_tied = center_tied[label_tied.flatten()]
-                                result_image_tied = res_tied
-                                result_image_tied[result_image_tied != np.amax(center_tied)] = 0
-                                result_image_tied[result_image_tied == np.amax(center_tied)] = 1
-                                b = np.zeros(img_patch.shape)
-                                pos = np.where(img_patch != 0)
-                                b[pos[0], pos[1]] = result_image_tied.reshape(len(img_patch[img_patch != 0]))
-                                if np.count_nonzero(b) < 200:
-                                    cnt += 1
-                                    prob_mat[patch_start_x: patch_end_x,patch_start_y: patch_end_y, l] = b
-                            except Exception:
-                                pass
+                            pixels = image[image != 0]
+                            vectorized = pixels.reshape((-1, 1))
+                            vectorized = np.float32(vectorized)
+                            if 0 in mask_check:
+                                n_components = 4
+                            else:
+                                n_components = 2
+                            if (3 in label_patch):
+                                n_components = 2
+                            gmm_model_tied = GMM(n_components=2, covariance_type='tied').fit(vectorized)
+                            center_tied = gmm_model_tied.means_
+                            label_tied = gmm_model_tied.predict(vectorized).reshape(-1, 1)
+                            res_tied = center_tied[label_tied.flatten()]
+                            result_image_tied = res_tied
+                            result_image_tied[result_image_tied != np.amax(center_tied)] = 0
+                            result_image_tied[result_image_tied == np.amax(center_tied)] = 1
+                            b = np.zeros(img_patch.shape)
+                            pos = np.where(img_patch != 0)
+                            b[pos[0], pos[1]] = result_image_tied.reshape(len(img_patch[img_patch != 0]))
+                            b = b.astype('int8')
+                            num_labels, labels_im = cv2.connectedComponents(b)
+                            threshold = 350
+                            if (0 in mask_check):
+                                threshold = 100
+                            if (3 in label_patch):
+                                threshold = 350   
+                            if (num_labels < 5) and (np.count_nonzero(b) < threshold):
+                                cnt += 1
+                                prob_mat[patch_start_x: patch_end_x,patch_start_y: patch_end_y, l] = b                 
         # save prob_mat
         print('the number of vessel patch:', cnt)
         create_and_save_nifti(prob_mat, rough_mask_dir +
-                              j.split(os.sep)[-1].split('_')[0] + '_label_rough.nii')
+                              j.split(os.sep)[-1].split('_')[0] + '_label_rough.nii.gz')
     print()
     print('DONE')
 

@@ -11,6 +11,7 @@ import os
 import numpy as np
 import nibabel as nib
 from captcha.utils import helper
+from captcha.utils.helper import getAllFiles
 
 def main(args):
     original_data_dir = os.path.expanduser(args.original_data_dir)
@@ -18,8 +19,10 @@ def main(args):
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
     # List filenames of data
-    #input_list, mask_list, label_list = helper.gen_filename_pairs_3(original_data_dir, 'ToF', 'mask', 'vessel')
-    input_list, mask_list, label_list = helper.gen_filename_pairs_3(original_data_dir, 'img', 'mask', 'grid')
+    unfiltered_filelist = getAllFiles(original_data_dir)
+    input_list = [item for item in unfiltered_filelist if re.search('_img', item)]
+    mask_list = [item for item in unfiltered_filelist if re.search('_mask', item)]
+    label_list = [item for item in unfiltered_filelist if re.search('_grid', item)]
     input_list = sorted(input_list)
     mask_list = sorted(mask_list)
     label_list = sorted(label_list)

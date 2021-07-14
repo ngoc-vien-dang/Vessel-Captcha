@@ -10,7 +10,7 @@ import numpy as np
 import os
 import argparse
 import sys
-from captcha.utils.helper import gen_filename_pairs_2
+from captcha.utils.helper import getAllFiles
 from captcha.utils.helper import load_nifti_mat_from_file
 from sklearn.metrics import roc_auc_score, accuracy_score, f1_score
 from captcha.utils.metrics import avg_class_acc
@@ -19,7 +19,9 @@ from captcha.utils.metrics import avg_class_acc
 def main(args):
     result_dir = args.result_dir  
     # List filenames of data after the skull stripping process
-    label_list, prediction_list = gen_filename_pairs_2(result_dir, 'label', 'prediction')
+    unfiltered_filelist = getAllFiles(result_dir)
+    label_list = [item for item in unfiltered_filelist if re.search('_label', item)]
+    prediction_list = [item for item in unfiltered_filelist if re.search('_prediction', item)]
     label_list = sorted(label_list)
     prediction_list = sorted(prediction_list)
     print(label_list)

@@ -11,40 +11,17 @@ import nibabel as nib
 import numpy as np
 import random
 
-def listfiles(folder):
-    for root, folders, files in os.walk(folder):
-        for filename in folders + files:
-            yield os.path.join(root, filename)
-
-def gen_filename_pairs_2(data_dir, v_re, l_re):
-    unfiltered_filelist = list(listfiles(data_dir))
-    input_list = [item for item in unfiltered_filelist if re.search(v_re, item)]
-    label_list = [item for item in unfiltered_filelist if re.search(l_re, item)]
-    print(input_list)
-    print(label_list)
-    print("input_list size:    ", len(input_list))
-    print("label_list size:    ", len(label_list))
-    if len(input_list) != len(label_list):
-        print("input_list size and mask_list and label_list size don't match")
-        raise Exception
-    return input_list, label_list
-
-
-def gen_filename_pairs_3(data_dir, v_re, m_re, l_re):
-    unfiltered_filelist = list(listfiles(data_dir))
-    input_list = [item for item in unfiltered_filelist if re.search(v_re, item)]
-    mask_list = [item for item in unfiltered_filelist if re.search(m_re, item)]
-    label_list = [item for item in unfiltered_filelist if re.search(l_re, item)]
-    print(input_list)
-    print(mask_list)
-    print(label_list)
-    print("input_list size:    ", len(input_list))
-    print("mask_list size:    ", len(mask_list))
-    print("label_list size:    ", len(label_list))
-    if len(input_list) != len(label_list) or len(input_list) != len(mask_list):
-        print("input_list size and mask_list and label_list size don't match")
-        raise Exception
-    return input_list, mask_list, label_list
+def getAllFiles(dir, result = None):
+    if result is None:
+        result = []
+    for entry in os.listdir(dir):
+        entrypath = os.path.join(dir, entry)
+        if os.path.isdir(entrypath):
+            getAllFiles(entrypath ,result)
+        else:
+            result.append(entrypath)
+    result = sorted(result)
+    return result
 
 def load_nifti_mat_from_file(path_orig):
     """
